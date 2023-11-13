@@ -7,6 +7,7 @@ from apis_to_get_currencies import get_sheqel_to_dollar_exchange_value, get_rubl
 class Purchases_info:
     '''Class that takes one compulsory argument - filename of CSV file.
     CSV file should obligatory have fields named "dt_info", "paid" in order to the program processes correctly;
+    date in dt_info in CSV file must be in iso format;
     currency symbol should go after a sum of money in the same field. Use standart symbols: ₽, $, ₪.
     Currency exchange values are taken from https://ru.investing.com/currencies.
     Currently program works for 3 currencies: rubles, sheqels, dollars'''
