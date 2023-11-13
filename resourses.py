@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 import csv
 from calendar import month_abbr
 from apis_to_get_currencies import get_sheqel_to_dollar_exchange_value, get_ruble_to_dollar_exchange_value
+import re
 
 class Purchases_info:
     '''Class that takes one compulsory argument - filename of CSV file.
     CSV file should obligatory have fields named "dt_info", "paid" in order to the program processes correctly;
-    date in dt_info in CSV file must be in iso format;
-    currency symbol should go after a sum of money in the same field. Use standart symbols: ₽, $, ₪.
+    date in dt_info in CSV file must be in iso format; currency symbol should go after a sum of money in the same field.
+    Use standart symbols or codes: ₽, $, ₪ or RUB, USD, ILS.
     Currency exchange values are taken from https://ru.investing.com/currencies.
     Currently program works for 3 currencies: rubles, sheqels, dollars'''
 
@@ -29,8 +30,8 @@ class Purchases_info:
                 lambda line: start_date <= datetime.fromisoformat(line['dt_info']).date() <= end_date, info)
             for line in purchases_during_period:
                 sum = line['paid']
-                if '₽' in sum:
-                    sum = float(sum.replace('₽', ''))
+                if ('₽' or 'RUB') in sum:
+                    sum = float(sum.replace('₽', '').replace('RUB', ''))
                     total_rubles += sum
         return total_rubles
 
@@ -46,8 +47,8 @@ class Purchases_info:
                 lambda line: start_date <= datetime.fromisoformat(line['dt_info']).date() <= end_date, info)
             for line in purchases_during_period:
                 sum = line['paid']
-                if '$' in sum:
-                    sum = float(sum.replace('$', ''))
+                if ('$' or 'USD') in sum:
+                    sum = float(sum.replace('$', '').replace('USD', ''))
                     total_dollars += sum
         return total_dollars
 
@@ -64,8 +65,8 @@ class Purchases_info:
                 lambda line: start_date <= datetime.fromisoformat(line['dt_info']).date() <= end_date, info)
             for line in purchases_during_period:
                 sum = line['paid']
-                if '₪' in sum:
-                    sum = float(sum.replace('₪', ''))
+                if ('₪' or 'ILS') in sum:
+                    sum = float(sum.replace('₪', '').replace('ILS', ''))
                     total_sheqel += sum
         return total_sheqel
 
