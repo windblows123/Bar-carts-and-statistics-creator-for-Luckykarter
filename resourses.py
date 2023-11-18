@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import csv
 from calendar import month_abbr
 from apis_to_get_currencies import get_sheqel_to_dollar_exchange_value, get_ruble_to_dollar_exchange_value
-import re
 
 class Purchases_info:
     '''Class that takes one compulsory argument - filename of CSV file.
@@ -18,66 +17,40 @@ class Purchases_info:
         self.rub_to_usd_exchange_value = get_ruble_to_dollar_exchange_value()
         self.sheq_to_usd_exchange_value = get_sheqel_to_dollar_exchange_value()
 
-    def total_rubles(self, start_date: date, end_date: date):
-        '''Function takes 2 args: start date and end date of chosen period of time.
-        Args must be of datetime.date type.
-        Returns sum of payments which were paid in rubles during chosen period of time'''
 
+    def total_currencies(self, start_date: date, end_date: date) ->tuple[int]:
         total_rubles = 0
-        with open('test_data.csv', 'r', encoding='UTF-8') as file:
-            info = csv.DictReader(file)
-            purchases_during_period = filter(
-                lambda line: start_date <= datetime.fromisoformat(line['dt_info']).date() <= end_date, info)
-            for line in purchases_during_period:
-                sum = line['paid']
-                if ('₽' or 'RUB') in sum:
-                    sum = float(sum.replace('₽', '').replace('RUB', ''))
-                    total_rubles += sum
-        return total_rubles
-
-    def total_dollars(self, start_date: date, end_date: date):
-        '''Function takes 2 args: start date and end date of chosen period of time.
-        Args must be of datetime.date type.
-        Returns sum of payments which were paid in dollars during chosen period of time'''
-
         total_dollars = 0
+        total_sheqels = 0
         with open('test_data.csv', 'r', encoding='UTF-8') as file:
             info = csv.DictReader(file)
             purchases_during_period = filter(
                 lambda line: start_date <= datetime.fromisoformat(line['dt_info']).date() <= end_date, info)
             for line in purchases_during_period:
-                sum = line['paid']
-                if ('$' or 'USD') in sum:
-                    sum = float(sum.replace('$', '').replace('USD', ''))
-                    total_dollars += sum
-        return total_dollars
-
-
-    def total_sheqels(self, start_date: date, end_date: date):
-        '''Function takes 2 args: start date and end date of chosen period of time.
-        Args must be of datetime.date type.
-        Returns sum of payments which were paid in sheqels during chosen period of time'''
-
-        total_sheqel = 0
-        with open('test_data.csv', 'r', encoding='UTF-8') as file:
-            info = csv.DictReader(file)
-            purchases_during_period = filter(
-                lambda line: start_date <= datetime.fromisoformat(line['dt_info']).date() <= end_date, info)
-            for line in purchases_during_period:
-                sum = line['paid']
-                if ('₪' or 'ILS') in sum:
-                    sum = float(sum.replace('₪', '').replace('ILS', ''))
-                    total_sheqel += sum
-        return total_sheqel
+                amount_of_money = line['paid']
+                if ('₽' or 'RUB') in amount_of_money:
+                    amount_of_money = float(amount_of_money.replace('₽', '').replace('RUB', ''))
+                    total_rubles += amount_of_money
+                elif ('$' or 'USD') in amount_of_money:
+                    amount_of_money = float(amount_of_money.replace('$', '').replace('USD', ''))
+                    total_dollars += amount_of_money
+                elif ('₪' or 'ILS') in amount_of_money:
+                    amount_of_money = float(amount_of_money.replace('₪', '').replace('ILS', ''))
+                    total_sheqels += amount_of_money
+        return (total_rubles, total_dollars, total_sheqels)
 
     def total_income_in_dollars(self, start_date: date, end_date: date):
         '''Function takes 2 args: start date and end date of chosen period of time.
         Args must be of datetime.date type.
         Returns sum of payments in all currencies during chosen period of time'''
 
-        total = (self.total_rubles(start_date, end_date) * self.rub_to_usd_exchange_value +
-                 self.total_sheqels(start_date, end_date) * self.sheq_to_usd_exchange_value +
-                 self.total_dollars(start_date, end_date))
+        total_rubles, total_dollars, total_sheqels = self.total_currencies(start_date, end_date)
+        self.dollars = total_dollars
+        self.rubles = total_rubles
+        self.sheqels = total_sheqels
+        total = (total_rubles * self.rub_to_usd_exchange_value +
+                 total_sheqels * self.sheq_to_usd_exchange_value +
+                 total_dollars)
         return total
 
     def drow_a_bar_chart(self, start_date: date, end_date: date):
@@ -97,9 +70,9 @@ class Purchases_info:
         plt.bar(x_axis, y_axis, label=f'Income rates in $')
         plt.legend()
         plt.xlabel(f'Dates\nTOTAL: {round(self.total_income_in_dollars(start_date, end_date))} USD PAID IN CURRENCIES: '
-                   f'{round(self.total_rubles(start_date, end_date))}₽  |  '
-                   f'{round(self.total_dollars(start_date, end_date))}$  |  '
-                   f'{round(self.total_sheqels(start_date, end_date))}₪')
+                   f'{round(self.rubles)}₽  |  '
+                   f'{round(self.dollars)}$  |  '
+                   f'{round(self.sheqels)}₪')
         plt.ylabel('Income')
         plt.title('Total daily income in $')
         plt.show()
