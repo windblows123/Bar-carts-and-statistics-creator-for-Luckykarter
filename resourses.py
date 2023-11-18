@@ -18,7 +18,11 @@ class Purchases_info:
         self.sheq_to_usd_exchange_value = get_sheqel_to_dollar_exchange_value()
 
 
-    def total_currencies(self, start_date: date, end_date: date) ->tuple[int]:
+    def total_currencies(self, start_date: date, end_date: date) -> tuple[int]:
+        '''Function takes 2 args: start date and end date of chosen period of time.
+        Args must be of datetime.date type.
+        Returns a tuple of three numbers: total paid rubles, dollars, sheqels'''
+
         total_rubles = 0
         total_dollars = 0
         total_sheqels = 0
