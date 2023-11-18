@@ -16,6 +16,9 @@ class Purchases_info:
         self.filename = filename
         self.rub_to_usd_exchange_value = get_ruble_to_dollar_exchange_value()
         self.sheq_to_usd_exchange_value = get_sheqel_to_dollar_exchange_value()
+        self.rubles = None
+        self.dollars = None
+        self.sheqels = None
 
 
     def total_currencies(self, start_date: date, end_date: date) -> tuple[int]:
@@ -26,7 +29,7 @@ class Purchases_info:
         total_rubles = 0
         total_dollars = 0
         total_sheqels = 0
-        with open('test_data.csv', 'r', encoding='UTF-8') as file:
+        with open(self.filename, 'r', encoding='UTF-8') as file:
             info = csv.DictReader(file)
             purchases_during_period = filter(
                 lambda line: start_date <= datetime.fromisoformat(line['dt_info']).date() <= end_date, info)
@@ -46,7 +49,8 @@ class Purchases_info:
     def total_income_in_dollars(self, start_date: date, end_date: date):
         '''Function takes 2 args: start date and end date of chosen period of time.
         Args must be of datetime.date type.
-        Returns sum of payments in all currencies during chosen period of time'''
+        Returns sum of payments in all currencies during chosen period of time.
+        During every call it updates values of attributes self.rubles, self.dollars, self.sheqels'''
 
         total_rubles, total_dollars, total_sheqels = self.total_currencies(start_date, end_date)
         self.dollars = total_dollars
